@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PDFtoIMG — Convert PDF to Images</title>
+  <title>pdf2image.online — Convert PDF to Images</title>
+  <link rel="icon" href="/favicon.ico" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -30,17 +31,18 @@
 
     /* ── Nav ── */
     nav {
-      background: var(--accent);
+      background: #fff;
       padding: 0 32px;
-      height: 56px;
+      height: 64px;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      border-bottom: 1px solid var(--border);
     }
-    .nav-logo { color: #fff; font-size: 1.2rem; font-weight: 700; letter-spacing: -0.5px; }
+    .nav-logo img { height: 40px; display: block; }
     .nav-cta {
-      background: #fff;
-      color: var(--accent);
+      background: var(--accent);
+      color: #fff;
       font-weight: 600;
       font-size: 0.875rem;
       padding: 7px 18px;
@@ -257,13 +259,13 @@
 
 <!-- Nav -->
 <nav>
-  <span class="nav-logo">PDFtoIMG</span>
+  <a href="/" class="nav-logo"><img src="/logo.png" alt="pdf2image.online" /></a>
   <a href="#desktop" class="nav-cta">Get Desktop App</a>
 </nav>
 
 <!-- Hero -->
 <div class="hero">
-  <h1>PDF to Images, instantly</h1>
+  <h1>Convert PDF to Images, instantly</h1>
   <p>Upload any PDF and download all pages as high-quality PNG or JPG images. Free, no sign-up.</p>
 </div>
 
@@ -345,7 +347,7 @@
 </div>
 
 <!-- Footer -->
-<footer>© 2026 PDFtoIMG</footer>
+<footer>© 2026 pdf2image.online</footer>
 
 <script>
   // ── Stripe buy button ──
