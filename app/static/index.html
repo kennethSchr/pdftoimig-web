@@ -370,8 +370,11 @@
     "One-time purchase, yours forever",
   ];
 
-  // Assign variant once per visitor and persist
-  let variant = localStorage.getItem("ab_variant");
+  // Allow ?variant=A/B/C override for testing (doesn't save to localStorage)
+  const urlVariant = new URLSearchParams(window.location.search).get("variant");
+  let variant = urlVariant && AB_VARIANTS[urlVariant.toUpperCase()]
+    ? urlVariant.toUpperCase()
+    : localStorage.getItem("ab_variant");
   if (!variant) {
     const keys = Object.keys(AB_VARIANTS);
     variant = keys[Math.floor(Math.random() * keys.length)];
