@@ -146,9 +146,10 @@ async def secure_download(token: str):
     if not DOWNLOAD_FILE.exists():
         raise HTTPException(status_code=404, detail="File not found on server.")
 
+    media = "application/octet-stream"
     return FileResponse(
         path=str(DOWNLOAD_FILE),
-        media_type="application/zip",
+        media_type=media,
         filename=DOWNLOAD_FILE.name,
     )
 
