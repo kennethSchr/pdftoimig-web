@@ -3,6 +3,7 @@
 import io
 import os
 import zipfile
+from collections import defaultdict
 from pathlib import Path
 
 import stripe
@@ -26,6 +27,10 @@ TOKEN_SECRET          = os.getenv("TOKEN_SECRET", "change-me-in-production")
 signer = TimestampSigner(TOKEN_SECRET)
 
 app = FastAPI(title="PDFtoIMG")
+
+# ── A/B test tracking (in-memory, resets on redeploy) ─────────────────────────
+ab_impressions = defaultdict(int)
+ab_clicks      = defaultdict(int)
 
 
 # ── Convert ───────────────────────────────────────────────────────────────────
@@ -152,6 +157,34 @@ async def secure_download(token: str):
         media_type=media,
         filename=DOWNLOAD_FILE.name,
     )
+
+
+# ── A/B test endpoints ────────────────────────────────────────────────────────
+
+@app.post("/api/ab/impression")
+async def ab_impression(request: Request):
+    data = await request.json()
+    variant = data.get("variant", "unknown")
+    ab_impressions[variant] += 1
+    return {"ok": True}
+
+@app.post("/api/ab/click")
+async def ab_click(request: Request):
+    data = await request.json()
+    variant = data.get("variant", "unknown")
+    ab_clicks[variant] += 1
+    return {"ok": True}
+
+@app.get("/api/ab/results")
+def ab_results():
+    variants = sorted(set(list(ab_impressions.keys()) + list(ab_clicks.keys())))
+    rows = []
+    for v in variants:
+        imp = ab_impressions[v]
+        clicks = ab_clicks[v]
+        ctr = round(clicks / imp * 100, 1) if imp > 0 else 0
+        rows.append({"variant": v, "impressions": imp, "clicks": clicks, "ctr": f"{ctr}%"})
+    return {"results": rows}
 
 
 # ── Pages ─────────────────────────────────────────────────────────────────────

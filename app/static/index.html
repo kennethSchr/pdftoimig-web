@@ -332,16 +332,8 @@
 <!-- Desktop CTA -->
 <div class="desktop-section" id="desktop">
   <div class="desktop-card">
-    <div class="dc-text">
-      <h2>Your PDF never leaves your computer</h2>
-      <p>The desktop app converts everything <strong style="color:#fff;">100% locally</strong> — no upload, no internet connection, no servers. Perfect for sensitive documents you don't want to share with anyone.</p>
-      <ul>
-        <li>Nothing is uploaded — ever</li>
-        <li>Works completely offline</li>
-        <li>No file size restrictions</li>
-        <li>Ideal for contracts, medical records &amp; personal documents</li>
-        <li>One-time purchase, yours forever</li>
-      </ul>
+    <div class="dc-text" id="abText">
+      <!-- Filled by A/B test script -->
     </div>
     <div style="display:flex;flex-direction:column;align-items:center;gap:10px;flex-shrink:0;">
       <a href="#" class="buy-btn" id="buyBtn">Buy — €9</a>
@@ -354,12 +346,66 @@
 <footer>© 2026 pdf2image.online</footer>
 
 <script>
+  // ── A/B test ──
+  const AB_VARIANTS = {
+    A: {
+      headline: "Is your PDF personal or confidential?",
+      body:     "Keep it on your computer. The desktop app converts everything locally — nothing is ever uploaded.",
+    },
+    B: {
+      headline: "Don't want to upload your documents?",
+      body:     "The desktop app works 100% offline. Your files never leave your computer.",
+    },
+    C: {
+      headline: "Confidential documents? Don't upload them.",
+      body:     "Convert locally with our desktop app — no internet required, nothing ever sent to a server.",
+    },
+  };
+
+  const AB_FEATURES = [
+    "Nothing is uploaded — ever",
+    "Works completely offline",
+    "No file size restrictions",
+    "Ideal for contracts, medical records &amp; personal documents",
+    "One-time purchase, yours forever",
+  ];
+
+  // Assign variant once per visitor and persist
+  let variant = localStorage.getItem("ab_variant");
+  if (!variant) {
+    const keys = Object.keys(AB_VARIANTS);
+    variant = keys[Math.floor(Math.random() * keys.length)];
+    localStorage.setItem("ab_variant", variant);
+  }
+
+  const v = AB_VARIANTS[variant];
+  document.getElementById("abText").innerHTML = `
+    <h2>${v.headline}</h2>
+    <p>${v.body}</p>
+    <ul>${AB_FEATURES.map(f => `<li>${f}</li>`).join("")}</ul>
+  `;
+
+  // Track impression
+  fetch("/api/ab/impression", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ variant }),
+  }).catch(() => {});
+
   // ── Stripe buy button ──
   document.getElementById("buyBtn").addEventListener("click", async e => {
     e.preventDefault();
     const btn = e.currentTarget;
     btn.textContent = "Loading…";
     btn.style.opacity = ".7";
+
+    // Track buy click for A/B test
+    fetch("/api/ab/click", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ variant }),
+    }).catch(() => {});
+
     try {
       const res  = await fetch("/api/stripe/checkout", { method: "POST" });
       const data = await res.json();
