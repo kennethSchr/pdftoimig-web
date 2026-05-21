@@ -80,8 +80,10 @@
       const res  = await fetch(`/api/stripe/session?session_id=${sessionId}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || "Payment not verified.");
+      const dlUrl = `/api/download/${data.download_token}`;
       document.getElementById("content").innerHTML =
-        `<a class="download-btn" href="${data.download_url}" download>⬇ Download PDFtoIMG.zip</a>`;
+        `<a class="download-btn" href="${dlUrl}" download>⬇ Download PDFtoIMG.zip</a>
+         <p style="margin-top:12px;color:#6B7A99;font-size:.85rem;">Link expires after 24 hours.</p>`;
     } catch (e) {
       document.getElementById("content").innerHTML =
         `<p class="error">⚠ ${e.message}</p>`;

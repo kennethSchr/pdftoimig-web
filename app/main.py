@@ -8,18 +8,22 @@ from pathlib import Path
 import stripe
 from dotenv import load_dotenv
 from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
-from fastapi.responses import StreamingResponse
+from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
+from itsdangerous import BadSignature, SignatureExpired, TimestampSigner
 
 from convert import convert_pdf
 
 load_dotenv()
 
-stripe.api_key = os.getenv("STRIPE_SECRET_KEY", "")
+stripe.api_key        = os.getenv("STRIPE_SECRET_KEY", "")
 STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "")
 STRIPE_PRICE_ID       = os.getenv("STRIPE_PRICE_ID", "")
-APP_DOWNLOAD_URL      = os.getenv("APP_DOWNLOAD_URL", "")
 STRIPE_PUB_KEY        = os.getenv("STRIPE_PUBLISHABLE_KEY", "")
+DOWNLOAD_FILE         = Path(os.getenv("DOWNLOAD_FILE", "/downloads/PDFtoIMAGE.zip"))
+TOKEN_SECRET          = os.getenv("TOKEN_SECRET", "change-me-in-production")
+
+signer = TimestampSigner(TOKEN_SECRET)
 
 app = FastAPI(title="PDFtoIMG")
 
@@ -103,17 +107,15 @@ async def stripe_webhook(request: Request):
 
     if event["type"] == "checkout.session.completed":
         session = event["data"]["object"]
-        # Payment confirmed — you can log, send email, etc. here
         print(f"Payment confirmed: {session['id']} — {session.get('customer_email')}")
 
     return {"ok": True}
 
 
-# ── Success page data ─────────────────────────────────────────────────────────
+# ── Stripe: verify session → return signed download token ────────────────────
 
 @app.get("/api/stripe/session")
 async def get_session(session_id: str):
-    """Frontend calls this to verify payment and get download URL."""
     if not stripe.api_key:
         raise HTTPException(status_code=503, detail="Stripe not configured.")
     try:
@@ -124,14 +126,31 @@ async def get_session(session_id: str):
     if session.payment_status != "paid":
         raise HTTPException(status_code=402, detail="Payment not completed.")
 
-    return {"download_url": APP_DOWNLOAD_URL}
+    # Generate a signed token valid for 24 hours
+    token = signer.sign(session_id).decode()
+    return {"download_token": token}
 
 
-# ── Config for frontend ───────────────────────────────────────────────────────
+# ── Secure download ───────────────────────────────────────────────────────────
 
-@app.get("/api/config")
-def get_config():
-    return {"stripe_pub_key": STRIPE_PUB_KEY}
+@app.get("/api/download/{token}")
+async def secure_download(token: str):
+    try:
+        # max_age = 24 hours
+        signer.unsign(token, max_age=86400)
+    except SignatureExpired:
+        raise HTTPException(status_code=410, detail="Download link has expired.")
+    except BadSignature:
+        raise HTTPException(status_code=403, detail="Invalid download link.")
+
+    if not DOWNLOAD_FILE.exists():
+        raise HTTPException(status_code=404, detail="File not found on server.")
+
+    return FileResponse(
+        path=str(DOWNLOAD_FILE),
+        media_type="application/zip",
+        filename=DOWNLOAD_FILE.name,
+    )
 
 
 # ── Health ────────────────────────────────────────────────────────────────────
