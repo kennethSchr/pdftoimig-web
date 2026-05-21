@@ -288,6 +288,76 @@
     }
     .buy-btn:hover { background: var(--accent-dark); }
 
+    /* ── Content sections ── */
+    .content-section {
+      max-width: 620px;
+      margin: 0 auto 64px;
+      padding: 0 16px;
+    }
+    .content-section h2 {
+      font-size: 1.5rem; font-weight: 800;
+      margin-bottom: 8px; letter-spacing: -.5px;
+    }
+    .content-section .sub {
+      color: var(--muted); font-size: .95rem;
+      margin-bottom: 28px; line-height: 1.6;
+    }
+
+    /* Steps */
+    .steps { display: flex; flex-direction: column; gap: 16px; }
+    .step {
+      display: flex; align-items: flex-start; gap: 16px;
+      background: var(--card); border-radius: var(--radius);
+      padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,.06);
+    }
+    .step-num {
+      flex-shrink: 0; width: 36px; height: 36px;
+      background: var(--accent); color: #fff;
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: .95rem;
+    }
+    .step h3 { font-size: 1rem; font-weight: 700; margin-bottom: 4px; }
+    .step p  { color: var(--muted); font-size: .9rem; line-height: 1.5; }
+
+    /* Features grid */
+    .features {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    .feature-card {
+      background: var(--card); border-radius: var(--radius);
+      padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,.06);
+    }
+    .feature-card .fi { font-size: 1.6rem; margin-bottom: 10px; }
+    .feature-card h3  { font-size: .95rem; font-weight: 700; margin-bottom: 6px; }
+    .feature-card p   { color: var(--muted); font-size: .875rem; line-height: 1.5; }
+
+    /* FAQ */
+    .faq { display: flex; flex-direction: column; gap: 12px; }
+    .faq-item {
+      background: var(--card); border-radius: var(--radius);
+      box-shadow: 0 2px 8px rgba(0,0,0,.06); overflow: hidden;
+    }
+    .faq-q {
+      width: 100%; text-align: left; padding: 18px 20px;
+      font-weight: 700; font-size: .95rem; background: none;
+      border: none; cursor: pointer; display: flex;
+      justify-content: space-between; align-items: center;
+      color: var(--text);
+    }
+    .faq-q:hover { background: var(--accent-light); }
+    .faq-q .arrow { font-size: .8rem; transition: transform .2s; color: var(--muted); }
+    .faq-q.open .arrow { transform: rotate(180deg); }
+    .faq-a {
+      display: none; padding: 0 20px 18px;
+      color: var(--muted); font-size: .9rem; line-height: 1.6;
+    }
+    .faq-a.open { display: block; }
+
+    @media (max-width: 540px) {
+      .features { grid-template-columns: 1fr; }
+    }
+
     /* ── Footer ── */
     footer {
       text-align: center;
@@ -379,6 +449,105 @@
   </div>
 </div>
 
+<!-- How it works -->
+<section class="content-section" aria-label="How it works">
+  <h2>Done before you finish your coffee ☕</h2>
+  <p class="sub">Seriously. Three clicks and you're out. No account, no waiting, no nonsense.</p>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div>
+        <h3>Drop your PDF</h3>
+        <p>Click the upload area or drag your PDF straight onto it. Works with any PDF — scanned documents, reports, forms, you name it.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div>
+        <h3>Pick your settings</h3>
+        <p>Choose resolution (150 DPI is the sweet spot for most uses) and format — PNG for crisp quality, JPG for smaller file sizes.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div>
+        <h3>Download and done</h3>
+        <p>Hit Convert, grab your ZIP file with all the pages as individual images. The whole thing takes a few seconds. Told you it was fast.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Features -->
+<section class="content-section" aria-label="Features">
+  <h2>Everything you need, nothing you don't</h2>
+  <p class="sub">No bloated interface. No subscription. No "please rate us" pop-ups. Just a tool that works.</p>
+  <div class="features">
+    <div class="feature-card">
+      <div class="fi">⚡</div>
+      <h3>Genuinely fast</h3>
+      <p>Most PDFs are done in under 5 seconds. Even long documents convert before you can get distracted.</p>
+    </div>
+    <div class="feature-card">
+      <div class="fi">🆓</div>
+      <h3>Free, no strings</h3>
+      <p>No account. No watermarks. No "free trial ends in 3 days". Just upload and go.</p>
+    </div>
+    <div class="feature-card">
+      <div class="fi">🎯</div>
+      <h3>One image per page</h3>
+      <p>Every page becomes its own file, named and numbered so they stay in order. No chaos, no manual renaming.</p>
+    </div>
+    <div class="feature-card">
+      <div class="fi">🖼️</div>
+      <h3>PNG &amp; JPG</h3>
+      <p>PNG for max quality, JPG when you need smaller files. Your choice, either way.</p>
+    </div>
+    <div class="feature-card">
+      <div class="fi">📐</div>
+      <h3>Pick your DPI</h3>
+      <p>72 for web thumbnails, 150 for general use, 300 for print-ready images. Or type whatever you need.</p>
+    </div>
+    <div class="feature-card">
+      <div class="fi">📦</div>
+      <h3>Neat ZIP delivery</h3>
+      <p>All pages bundled in one ZIP file, ready to download. No fishing around for individual files.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="content-section" aria-label="FAQ">
+  <h2>Good questions</h2>
+  <p class="sub">The ones you'd Google if you didn't find them here.</p>
+  <div class="faq">
+    <div class="faq-item">
+      <button class="faq-q">How do I convert a PDF to JPG online for free? <span class="arrow">▼</span></button>
+      <div class="faq-a">Upload your PDF above, select JPG as the format, hit Convert, and download your ZIP. That's genuinely all there is to it — and yes, it's free.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q">What DPI should I use? <span class="arrow">▼</span></button>
+      <div class="faq-a">150 DPI is the default for good reason — it's sharp enough for screens and presentations without creating massive files. Going for print? Use 300. Just need a quick web thumbnail? 72 is fine.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q">Is there a file size limit? <span class="arrow">▼</span></button>
+      <div class="faq-a">The free online tool handles PDFs up to 50 MB. Got something bigger? The desktop app has zero limits — it runs locally so it can handle anything your computer can open.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q">Is my PDF safe to upload? <span class="arrow">▼</span></button>
+      <div class="faq-a">Your file is processed on our server and never stored — it's gone as soon as your ZIP is ready. That said, if your PDF is truly sensitive (contracts, medical records, personal documents), use the desktop app instead. Nothing leaves your computer at all.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q">Does it work with scanned PDFs? <span class="arrow">▼</span></button>
+      <div class="faq-a">Yep. Scanned PDFs, forms, slides, reports — if it opens in a PDF viewer, we can convert it.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q">What's the difference between the free tool and the desktop app? <span class="arrow">▼</span></button>
+      <div class="faq-a">The free online tool is perfect for quick, occasional conversions. The desktop app ($9, one-time) works completely offline, has no file size limits, and never uploads anything anywhere — ideal if you convert PDFs regularly or handle sensitive documents.</div>
+    </div>
+  </div>
+</section>
+
 <!-- Desktop CTA -->
 <div class="desktop-section" id="desktop">
   <div class="desktop-card">
@@ -396,6 +565,16 @@
 <footer>© 2026 pdf2image.online</footer>
 
 <script>
+  // ── FAQ accordion ──
+  document.querySelectorAll(".faq-q").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const answer = btn.nextElementSibling;
+      const isOpen = btn.classList.contains("open");
+      document.querySelectorAll(".faq-q").forEach(b => { b.classList.remove("open"); b.nextElementSibling.classList.remove("open"); });
+      if (!isOpen) { btn.classList.add("open"); answer.classList.add("open"); }
+    });
+  });
+
   // ── A/B test ──
   const AB_VARIANTS = {
     A: {
