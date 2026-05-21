@@ -153,6 +153,13 @@ async def secure_download(token: str):
     )
 
 
+# ── Pages ─────────────────────────────────────────────────────────────────────
+
+@app.get("/success")
+async def success_page():
+    return FileResponse(str(Path(__file__).parent / "static" / "success.html"))
+
+
 # ── Health ────────────────────────────────────────────────────────────────────
 
 @app.get("/api/health")
