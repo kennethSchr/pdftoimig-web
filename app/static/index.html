@@ -340,6 +340,7 @@
       </ul>
     </div>
     <a href="#" class="buy-btn" id="buyBtn">Buy — €9</a>
+    <p style="color:#6B8FC0;font-size:.8rem;margin-top:12px;text-align:center;">One-time payment · Instant download</p>
   </div>
 </div>
 
@@ -347,6 +348,24 @@
 <footer>© 2026 PDFtoIMG</footer>
 
 <script>
+  // ── Stripe buy button ──
+  document.getElementById("buyBtn").addEventListener("click", async e => {
+    e.preventDefault();
+    const btn = e.currentTarget;
+    btn.textContent = "Loading…";
+    btn.style.opacity = ".7";
+    try {
+      const res  = await fetch("/api/stripe/checkout", { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || "Could not start checkout.");
+      window.location.href = data.url;
+    } catch (err) {
+      alert("Could not start checkout: " + err.message);
+      btn.textContent  = "Buy — €9";
+      btn.style.opacity = "1";
+    }
+  });
+
   // ── State ──
   let selectedFile = null;
   let selectedDpi  = 150;

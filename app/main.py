@@ -1,18 +1,30 @@
 """PDFtoIMG — FastAPI web application."""
 
 import io
+import os
 import zipfile
 from pathlib import Path
 
-from fastapi import FastAPI, File, Form, HTTPException, UploadFile
-from fastapi.responses import Response, StreamingResponse
+import stripe
+from dotenv import load_dotenv
+from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
+from fastapi.responses import StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
 from convert import convert_pdf
 
+load_dotenv()
+
+stripe.api_key = os.getenv("STRIPE_SECRET_KEY", "")
+STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "")
+STRIPE_PRICE_ID       = os.getenv("STRIPE_PRICE_ID", "")
+APP_DOWNLOAD_URL      = os.getenv("APP_DOWNLOAD_URL", "")
+STRIPE_PUB_KEY        = os.getenv("STRIPE_PUBLISHABLE_KEY", "")
+
 app = FastAPI(title="PDFtoIMG")
 
-# ── API ───────────────────────────────────────────────────────────────────────
+
+# ── Convert ───────────────────────────────────────────────────────────────────
 
 @app.post("/api/convert")
 async def api_convert(
@@ -20,7 +32,6 @@ async def api_convert(
     dpi: int = Form(150),
     fmt: str = Form("png"),
 ):
-    # Validate
     if not file.filename.lower().endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Only PDF files are accepted.")
     if dpi < 36 or dpi > 600:
@@ -31,10 +42,9 @@ async def api_convert(
     pdf_bytes = await file.read()
     if len(pdf_bytes) == 0:
         raise HTTPException(status_code=400, detail="Uploaded file is empty.")
-    if len(pdf_bytes) > 50 * 1024 * 1024:  # 50 MB limit
+    if len(pdf_bytes) > 50 * 1024 * 1024:
         raise HTTPException(status_code=413, detail="File too large. Maximum size is 50 MB.")
 
-    # Convert
     try:
         images = convert_pdf(pdf_bytes, dpi=dpi, fmt=fmt)
     except Exception as e:
@@ -43,22 +53,88 @@ async def api_convert(
     if not images:
         raise HTTPException(status_code=422, detail="PDF appears to have no pages.")
 
-    # Pack into ZIP
     stem = Path(file.filename).stem
-    buf = io.BytesIO()
+    buf  = io.BytesIO()
     with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
         for i, img_bytes in enumerate(images, start=1):
             ext = "jpg" if fmt == "jpg" else "png"
             zf.writestr(f"{stem}_page{i:04d}.{ext}", img_bytes)
     buf.seek(0)
 
-    zip_name = f"{stem}_images.zip"
     return StreamingResponse(
         buf,
         media_type="application/zip",
-        headers={"Content-Disposition": f'attachment; filename="{zip_name}"'},
+        headers={"Content-Disposition": f'attachment; filename="{stem}_images.zip"'},
     )
 
+
+# ── Stripe: create checkout session ──────────────────────────────────────────
+
+@app.post("/api/stripe/checkout")
+async def create_checkout(request: Request):
+    if not stripe.api_key or not STRIPE_PRICE_ID:
+        raise HTTPException(status_code=503, detail="Stripe is not configured.")
+
+    base = str(request.base_url).rstrip("/")
+    try:
+        session = stripe.checkout.Session.create(
+            mode="payment",
+            line_items=[{"price": STRIPE_PRICE_ID, "quantity": 1}],
+            success_url=f"{base}/success?session_id={{CHECKOUT_SESSION_ID}}",
+            cancel_url=f"{base}/?cancelled=1",
+        )
+    except stripe.StripeError as e:
+        raise HTTPException(status_code=502, detail=str(e))
+
+    return {"url": session.url}
+
+
+# ── Stripe: webhook ───────────────────────────────────────────────────────────
+
+@app.post("/api/stripe/webhook")
+async def stripe_webhook(request: Request):
+    payload    = await request.body()
+    sig_header = request.headers.get("stripe-signature", "")
+
+    try:
+        event = stripe.Webhook.construct_event(payload, sig_header, STRIPE_WEBHOOK_SECRET)
+    except stripe.errors.SignatureVerificationError:
+        raise HTTPException(status_code=400, detail="Invalid signature.")
+
+    if event["type"] == "checkout.session.completed":
+        session = event["data"]["object"]
+        # Payment confirmed — you can log, send email, etc. here
+        print(f"Payment confirmed: {session['id']} — {session.get('customer_email')}")
+
+    return {"ok": True}
+
+
+# ── Success page data ─────────────────────────────────────────────────────────
+
+@app.get("/api/stripe/session")
+async def get_session(session_id: str):
+    """Frontend calls this to verify payment and get download URL."""
+    if not stripe.api_key:
+        raise HTTPException(status_code=503, detail="Stripe not configured.")
+    try:
+        session = stripe.checkout.Session.retrieve(session_id)
+    except stripe.StripeError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    if session.payment_status != "paid":
+        raise HTTPException(status_code=402, detail="Payment not completed.")
+
+    return {"download_url": APP_DOWNLOAD_URL}
+
+
+# ── Config for frontend ───────────────────────────────────────────────────────
+
+@app.get("/api/config")
+def get_config():
+    return {"stripe_pub_key": STRIPE_PUB_KEY}
+
+
+# ── Health ────────────────────────────────────────────────────────────────────
 
 @app.get("/api/health")
 def health():
