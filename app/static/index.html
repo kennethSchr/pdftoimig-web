@@ -288,6 +288,22 @@
     }
     .buy-btn:hover { background: var(--accent-dark); }
 
+    /* ── Desktop strip ── */
+    .desktop-strip {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #1A2132; border-radius: var(--radius);
+      padding: 14px 20px; text-decoration: none;
+      transition: background .15s; gap: 12px;
+    }
+    .desktop-strip:hover { background: #2D3A56; }
+    .desktop-strip span:first-child { color: #fff; font-size: .9rem; font-weight: 600; white-space: nowrap; }
+    .strip-cta { color: #7BA4E8; font-size: .875rem; text-align: right; }
+
+    @media (max-width: 480px) {
+      .desktop-strip { flex-direction: column; align-items: flex-start; }
+      .strip-cta { text-align: left; }
+    }
+
     /* ── Content sections ── */
     .content-section {
       max-width: 620px;
@@ -447,6 +463,14 @@
     </div>
 
   </div>
+</div>
+
+<!-- Desktop strip -->
+<div class="converter-wrap" style="margin-top:12px;">
+  <a href="#desktop" class="desktop-strip">
+    <span>🔒 Handling sensitive documents?</span>
+    <span class="strip-cta">Get the desktop app — nothing ever leaves your computer →</span>
+  </a>
 </div>
 
 <!-- How it works -->
