@@ -140,6 +140,17 @@
     .drop-zone input[type=file] {
       position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
     }
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
     .drop-icon { font-size: 2.4rem; margin-bottom: 10px; }
     .drop-zone p { color: var(--muted); font-size: .95rem; }
     .drop-zone p span { color: var(--accent); font-weight: 600; }
@@ -412,9 +423,10 @@
 
     <!-- Drop zone -->
     <div class="drop-zone" id="dropZone">
+      <label for="fileInput" class="sr-only">Choose a PDF file to convert</label>
       <input type="file" id="fileInput" accept=".pdf" />
       <div class="drop-icon">📄</div>
-      <p><span>Click to choose</span> or drag a PDF here</p>
+      <p id="dropZoneHint"><span>Click to choose</span> or drag a PDF here</p>
       <div class="file-name" id="fileName"></div>
     </div>
 
@@ -502,6 +514,44 @@
   </div>
 </section>
 
+<!-- Popular conversions -->
+<section class="content-section" aria-label="Popular conversions">
+  <h2>Popular conversions</h2>
+  <p class="sub">Looking for a specific format or workflow? Start here.</p>
+  <div class="features">
+    <a href="/pdf-to-jpg/" class="feature-card" style="text-decoration:none;color:inherit;">
+      <div class="fi">🖼️</div>
+      <h3>Convert PDF to JPG</h3>
+      <p>Turn every page into a JPG image. Free, fast and easy to share.</p>
+    </a>
+    <a href="/pdf-to-png/" class="feature-card" style="text-decoration:none;color:inherit;">
+      <div class="fi">📄</div>
+      <h3>Convert PDF to PNG</h3>
+      <p>Get crisp PNG images with sharp text, diagrams and screenshots.</p>
+    </a>
+    <a href="/offline-pdf-to-image-converter/" class="feature-card" style="text-decoration:none;color:inherit;">
+      <div class="fi">🔒</div>
+      <h3>Offline PDF to image converter</h3>
+      <p>Convert private PDFs locally on Windows — nothing is uploaded.</p>
+    </a>
+    <a href="/blog/pdf-to-jpg-or-png/" class="feature-card" style="text-decoration:none;color:inherit;">
+      <div class="fi">❓</div>
+      <h3>JPG or PNG?</h3>
+      <p>Not sure which format to choose? Read our quick comparison guide.</p>
+    </a>
+    <a href="/blog/convert-scanned-pdf-to-jpg/" class="feature-card" style="text-decoration:none;color:inherit;">
+      <div class="fi">📷</div>
+      <h3>Scanned PDF to JPG</h3>
+      <p>Turn scanned documents and photo-based PDFs into shareable JPG images.</p>
+    </a>
+    <a href="/confidential-pdf-converter/" class="feature-card" style="text-decoration:none;color:inherit;">
+      <div class="fi">🛡️</div>
+      <h3>Confidential PDF converter</h3>
+      <p>Convert sensitive documents offline — contracts, HR files and more.</p>
+    </a>
+  </div>
+</section>
+
 <!-- Features -->
 <section class="content-section" aria-label="Features">
   <h2>Everything you need, nothing you don't</h2>
@@ -586,7 +636,17 @@
 </div>
 
 <!-- Footer -->
-<footer>© 2026 pdf2image.online</footer>
+<footer>
+  <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:8px 20px;margin-bottom:12px;">
+    <a href="/pdf-to-jpg/" style="color:var(--muted);text-decoration:none;font-size:.85rem;">PDF to JPG</a>
+    <a href="/pdf-to-png/" style="color:var(--muted);text-decoration:none;font-size:.85rem;">PDF to PNG</a>
+    <a href="/offline-pdf-to-image-converter/" style="color:var(--muted);text-decoration:none;font-size:.85rem;">Offline converter</a>
+    <a href="/confidential-pdf-converter/" style="color:var(--muted);text-decoration:none;font-size:.85rem;">Confidential PDFs</a>
+    <a href="/blog/is-it-safe-to-upload-a-pdf-online/" style="color:var(--muted);text-decoration:none;font-size:.85rem;">PDF upload safety</a>
+    <a href="/blog/convert-scanned-pdf-to-jpg/" style="color:var(--muted);text-decoration:none;font-size:.85rem;">Scanned PDF to JPG</a>
+  </div>
+  © 2026 pdf2image.online
+</footer>
 
 <script>
   // ── FAQ accordion ──
