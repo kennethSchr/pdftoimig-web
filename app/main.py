@@ -159,6 +159,22 @@ async def secure_download(token: str):
     )
 
 
+# ── Open download (no token) ──────────────────────────────────────────────────
+# Direct, unauthenticated download so a static link (e.g. in the purchase email)
+# always works. The URL is public — anyone with it can download the file.
+
+@app.get("/download")
+async def open_download():
+    if not DOWNLOAD_FILE.exists():
+        raise HTTPException(status_code=404, detail="File not found on server.")
+
+    return FileResponse(
+        path=str(DOWNLOAD_FILE),
+        media_type="application/octet-stream",
+        filename=DOWNLOAD_FILE.name,
+    )
+
+
 # ── A/B test endpoints ────────────────────────────────────────────────────────
 
 @app.post("/api/ab/impression")
