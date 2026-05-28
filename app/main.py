@@ -1,5 +1,6 @@
 """PDFtoIMG — FastAPI web application."""
 
+import hmac
 import io
 import os
 import zipfile
@@ -22,6 +23,7 @@ STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "")
 STRIPE_PRICE_ID       = os.getenv("STRIPE_PRICE_ID", "")
 STRIPE_PUB_KEY        = os.getenv("STRIPE_PUBLISHABLE_KEY", "")
 DOWNLOAD_FILE         = Path(os.getenv("DOWNLOAD_FILE", "/downloads/PDFtoIMAGE.zip"))
+DOWNLOAD_KEY          = os.getenv("DOWNLOAD_KEY", "")
 TOKEN_SECRET          = os.getenv("TOKEN_SECRET", "change-me-in-production")
 
 signer = TimestampSigner(TOKEN_SECRET)
@@ -159,12 +161,17 @@ async def secure_download(token: str):
     )
 
 
-# ── Open download (no token) ──────────────────────────────────────────────────
-# Direct, unauthenticated download so a static link (e.g. in the purchase email)
-# always works. The URL is public — anyone with it can download the file.
+# ── Open download (secret key) ────────────────────────────────────────────────
+# Direct download guarded by a shared secret query parameter, so a static link
+# (e.g. in the purchase email) keeps working: /download?key=<DOWNLOAD_KEY>
 
 @app.get("/download")
-async def open_download():
+async def open_download(key: str = ""):
+    if not DOWNLOAD_KEY:
+        raise HTTPException(status_code=503, detail="Download is not configured.")
+    if not hmac.compare_digest(key, DOWNLOAD_KEY):
+        raise HTTPException(status_code=403, detail="Invalid or missing download key.")
+
     if not DOWNLOAD_FILE.exists():
         raise HTTPException(status_code=404, detail="File not found on server.")
 
